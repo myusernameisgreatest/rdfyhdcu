@@ -12,6 +12,7 @@ class Super:
     current_converted_price = 0
     difference = 1
     pozdr=0
+    denr=0
     name='имя'
     soname='фамилия'
     birthday='07-01-1995'
@@ -52,69 +53,55 @@ class Super:
         if data=='15-02' and self.pozdr==0:
             print('С праздником!!!')
             self.pozdr=1
-        if data==birthday:
+
+        if data==birthday and self.denr==1:
             print('С днем рождения, '+name+' '+soname+'!!!')
+            self.denr=1
         print('Температура воздуха в Краснознаменске сейчас '+str(currency)+' оС')
         time.sleep(300)
         self.chech_currency()
 
-    def init_db(self, force: bool = False):  # проверка существования нужной таблицы, в противном случае - создание
-        connection = psycopg2.connect(host=host, user=user, password=password, database=db_name)
+    def init_db(self):  # проверка существования нужной таблицы, в противном случае - создание
         #connection.autocommit = True
         if self.__connection is None:
             self.__connection = psycopg2.connect(host=host, user=user, password=password, database=db_name)
-        conn = self.__connection  # СОЗДАНИЕ ПОДКЛЮЧЕНИЯ
-        cursor = conn.cursor()  # СОЗДАНИЕ ПАЧКИ ЗАПРОСОВ ДЛЯ ОТПРАВКИ В БД
+        with self.__connection as connection:  # СОЗДАНИЕ ПОДКЛЮЧЕНИЯ
+            with self.__connection.cursor() as cursor:  # СОЗДАНИЕ ПАЧКИ ЗАПРОСОВ ДЛЯ ОТПРАВКИ В БД
+                    # cursor.execute('DROP TABLE IF EXISTS birthday')  # УДАЛИТЬ ЕЕ, ЕСЛИ ПЕРЕДАН ФЛАЖОК ФОРС
+                    # print("[INFO] Table was deleted")
 
-        cursor.execute("SELECT version();")  # передача в метод execute запроса на получение версии сервера
-        # print(f"Server version:{cursor.fetchone()}")  # fetchone возвращает кортеж или none, если запрос пустой
-
-        if force:
-            cursor.execute('DROP TABLE IF EXISTS birthday')  # УДАЛИТЬ ЕЕ, ЕСЛИ ПЕРЕДАН ФЛАЖОК ФОРС
-            print("[INFO] Table was deleted")
-
-        # cursor.execute("""CREATE TABLE birthday(
-        #             id          serial PRIMARY KEY,
-        #             myname      varchar NOT NULL,
-        #             mysoname    varchar NOT NULL,
-        #             dateof      varchar NOT NULL);""")
-        print(cursor.fetchall())
-        cursor.execute("""SELECT * FROM birthday""")
-        print((f"Data:{cursor.fetchone()}"))
-        print("[INFO] Table created successfully")
-        self.__connection.commit
-        cursor.close()
-        connection.close()
-        print("[INFO] PostgreSQL connection closed")
+                cursor.execute("""CREATE TABLE IF NOT EXISTS birthday(
+                            id          serial PRIMARY KEY,
+                            myname      varchar NOT NULL,
+                            mysoname    varchar NOT NULL,
+                            dateof      varchar NOT NULL);""")
+                self.__connection.commit
+                #print("[INFO] Table created successfully")
 
     def add_message(self, soname: str, name: str, birthday: str):#добавление данных
-        conn = self.__connection  # СОЗДАНИЕ ПОДКЛЮЧЕНИЯ
-        cursor = conn.cursor()  # СОЗДАНИЕ ПАЧКИ ЗАПРОСОВ ДЛЯ ОТПРАВКИ В БД
-        n=self.name
-        s=self.soname
-        b=self.birthday
-        cursor.execute("""INSERT INTO birthday (myname,mysoname,dateof) VALUES (%s,%s,%s);""",(soname, name, birthday))
-        print("[INFO] Data was successfully inserted")
-        self.__connection.commit
-        #cursor.close()
-        #self.__connection.close()
-        # print("[INFO] PostgreSQL connection closed")
+        with self.__connection as connection:  # СОЗДАНИЕ ПОДКЛЮЧЕНИЯ
+            with self.__connection.cursor() as cursor:  # СОЗДАНИЕ ПАЧКИ ЗАПРОСОВ ДЛЯ ОТПРАВКИ В БД
+                cursor.execute("""INSERT INTO birthday (myname,mysoname,dateof) VALUES (%s,%s,%s);""",(name,soname, birthday))
+                self.__connection.commit
+                print("[INFO] Data was successfully inserted")
 
     def list_messages(self, soname: str, name: str): # получение данных
-        conn = self.__connection  # СОЗДАНИЕ ПОДКЛЮЧЕНИЯ
-        cursor = conn.cursor()  # СОЗДАНИЕ ПАЧКИ ЗАПРОСОВ ДЛЯ ОТПРАВКИ В БД
-        cursor.execute("""SELECT dateof FROM birthday WHERE mysoname='Прокофьев' AND myname='Михаил';""")
+        with self.__connection as connection:  # СОЗДАНИЕ ПОДКЛЮЧЕНИЯ
+            with self.__connection.cursor() as cursor:  # СОЗДАНИЕ ПАЧКИ ЗАПРОСОВ ДЛЯ ОТПРАВКИ В БД
+                cursor.execute("""SELECT dateof FROM birthday WHERE mysoname=%s AND myname=%s ORDER BY myname;""",(soname, name))
+                self.__connection.commit
+                print(str('Ты родился: '+str(cursor.fetchone())))
+                return cursor.fetchone()
+                cursor.close()
+                self.__connection.close()
+                print("[INFO] PostgreSQL connection closed")
 
-        return cursor.fetchone()
-        self.__connection.commit
-        #print(str(blood))
-        #cursor.close()
-        #self.__connection.close()
-        # print("[INFO] PostgreSQL connection closed")
+    def proverka_nalichia(self, soname: str, name: str):
+        with self.__connection as connection:  # СОЗДАНИЕ ПОДКЛЮЧЕНИЯ
+            with self.__connection.cursor() as cursor:  # СОЗДАНИЕ ПАЧКИ ЗАПРОСОВ ДЛЯ ОТПРАВКИ В БД
+                cursor.execute("""SELECT dateof FROM birthday WHERE mysoname=%s AND myname=%s ORDER BY myname;""",(soname, name))
+                return cursor.fetchone()
 
-    def result(self, mysoname: str, myname: str):
-        r = self.list_messages(mysoname, myname)
-        print(r)
 
     def kolvo(self,birthday):
         kol = 0
@@ -151,11 +138,13 @@ print('Введите свое имя:')
 name=input()
 print('Введите свою фамилию:')
 soname=input()
-print('Введите дату своего рождения в формате: ДД-ММ')
-birthday=input()
-currency.kolvo(birthday)
-currency.cikl(birthday)
 currency.init_db()
-currency.add_message(soname,name,birthday)
-currency.result(soname,name)
+if currency.proverka_nalichia(soname, name)==None:
+    print('Введите дату своего рождения в формате: ДД-ММ')
+    birthday=input()
+    currency.kolvo(birthday)
+    currency.cikl(birthday)
+    currency.add_message(soname, name, birthday)
+else:
+    birthday=currency.list_messages(soname, name)
 currency.chech_currency()
