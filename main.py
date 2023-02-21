@@ -49,9 +49,11 @@ class Alfa:
         self.st = False
         print('проверка ', self.st)
         schedule.every().minutes.at(":01").do(stage.job, stage, message)
-        while self.st == False:
+        while True:
             schedule.run_pending()
             time.sleep(1)
+            if self.st == True:
+                break
 
     def stop(self,message):
         print('проверка2')
