@@ -1,65 +1,18 @@
-import requests
-from bs4 import BeautifulSoup
+import telebot
+from telebot import types
 import time
 import random
-import datetime
 import psycopg2
+import schedule
 from conf import host,user,password,db_name
 
-class Super:
-    sayt='https://www.google.ru/search?q=%D0%BF%D0%BE%D0%B3%D0%BE%D0%B4%D0%B0+%D0%B2+%D0%BA%D1%80%D0%B0%D1%81%D0%BD%D0%BE%D0%B7%D0%BD%D0%B0%D0%BC%D0%B5%D0%BD%D1%81%D0%BA%D0%B5&newwindow=1&sxsrf=AJOqlzUYMY_AXixbjGjIsYJwKEyktMDX0Q%3A1676367414314&ei=NlbrY6fjEvKGwPAP5o-P2AE&ved=0ahUKEwin1vih25T9AhVyAxAIHebHAxsQ4dUDCBA&uact=5&oq=%D0%BF%D0%BE%D0%B3%D0%BE%D0%B4%D0%B0+%D0%B2+%D0%BA%D1%80%D0%B0%D1%81%D0%BD%D0%BE%D0%B7%D0%BD%D0%B0%D0%BC%D0%B5%D0%BD%D1%81%D0%BA%D0%B5&gs_lcp=Cgxnd3Mtd2l6LXNlcnAQAzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIMCAAQ6gIQtAIQQxgBMgwIABDqAhC0AhBDGAEyEgguEMcBENEDEOoCELQCEEMYATIMCAAQ6gIQtAIQQxgBMgwIABDqAhC0AhBDGAEyEgguEMcBENEDEOoCELQCEEMYATISCC4QxwEQ0QMQ6gIQtAIQQxgBMgwIABDqAhC0AhBDGAEyDAgAEOoCELQCEEMYATIMCAAQ6gIQtAIQQxgBSgQIQRgASgQIRhgBUABYqjxgv0BoAXABeACAAQCIAQCSAQCYAQCgAQGwARTAAQHaAQYIARABGAE&sclient=gws-wiz-serp'
-    headers = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.41'}
-    current_converted_price = 0
-    difference = 1
-    pozdr=0
-    denr=0
-    name='имя'
-    soname='фамилия'
-    birthday='07-01-1995'
+bot=telebot.TeleBot('6147893827:AAGpotEVgnoK4Savpc_M1ns6UQcWyuWO4rI')
+
+class Beda:
+    id = '1'
     __connection = None
-
-    def __init__(self):
-        self.current_converted_price=int(self.get_currency_price())
-
-    def get_currency_price(self):
-        full_page = requests.get(self.sayt, headers=self.headers)
-        soup = BeautifulSoup(full_page.content, 'html.parser')
-        convert = soup.findAll("span", {"class": "wob_t","class": "q8U8x"})
-        return convert[0].text
-
-    def chech_currency(self):
-        currency = int(self.get_currency_price())
-        if currency>=self.current_converted_price + self.difference:
-            m=random.randrange(0, 10, 1)
-            if m<3:
-                print ("Потеплело, снимай шапку!")
-            if m>=3 and m<6:
-                print("Потеплело, снимай куртку!")
-            if m>=6:
-                print("Потеплело, снимай перчатки!")
-            self.current_converted_price = currency
-        elif currency<=self.current_converted_price - self.difference:
-            m = random.randrange(0, 10, 1)
-            if m < 3:
-                print("Похолодало, надевай шапку!")
-            if m >= 3 and m < 6:
-                print("Похолодало, надевай куртку!")
-            if m >= 6:
-                print("Похолодало, надевай перчатки!")
-            self.current_converted_price=currency
-        now = datetime.datetime.now()
-        print (now.strftime("%d-%m-%Y %H:%M"))
-        data=now.strftime("%d-%m")
-        if data=='15-02' and self.pozdr==0:
-            print('С праздником!!!')
-            self.pozdr=1
-
-        if data==birthday and self.denr==1:
-            print('С днем рождения, '+name+' '+soname+'!!!')
-            self.denr=1
-        print('Температура воздуха в Краснознаменске сейчас '+str(currency)+' оС')
-        time.sleep(300)
-        self.chech_currency()
+    #st=True
+    message='Привет'
 
     def init_db(self):  # проверка существования нужной таблицы, в противном случае - создание
         #connection.autocommit = True
@@ -67,84 +20,66 @@ class Super:
             self.__connection = psycopg2.connect(host=host, user=user, password=password, database=db_name)
         with self.__connection as connection:  # СОЗДАНИЕ ПОДКЛЮЧЕНИЯ
             with self.__connection.cursor() as cursor:  # СОЗДАНИЕ ПАЧКИ ЗАПРОСОВ ДЛЯ ОТПРАВКИ В БД
-                    # cursor.execute('DROP TABLE IF EXISTS birthday')  # УДАЛИТЬ ЕЕ, ЕСЛИ ПЕРЕДАН ФЛАЖОК ФОРС
-                    # print("[INFO] Table was deleted")
+                pass
 
-                cursor.execute("""CREATE TABLE IF NOT EXISTS birthday(
-                            id          serial PRIMARY KEY,
-                            myname      varchar NOT NULL,
-                            mysoname    varchar NOT NULL,
-                            dateof      varchar NOT NULL);""")
-                self.__connection.commit
-                #print("[INFO] Table created successfully")
-
-    def add_message(self, soname: str, name: str, birthday: str):#добавление данных
+    def list_messages(self, message, id): # получение данных
         with self.__connection as connection:  # СОЗДАНИЕ ПОДКЛЮЧЕНИЯ
-            with self.__connection.cursor() as cursor:  # СОЗДАНИЕ ПАЧКИ ЗАПРОСОВ ДЛЯ ОТПРАВКИ В БД
-                cursor.execute("""INSERT INTO birthday (myname,mysoname,dateof) VALUES (%s,%s,%s);""",(name,soname, birthday))
+            with connection.cursor() as cursor:  # СОЗДАНИЕ ПАЧКИ ЗАПРОСОВ ДЛЯ ОТПРАВКИ В БД
+                cursor.execute("""SELECT text FROM message WHERE id=%s;""", (id))
                 self.__connection.commit
-                print("[INFO] Data was successfully inserted")
+                bot.send_message(message.chat.id, cursor.fetchone())
+                #cursor.close()
+                #self.__connection.close()
 
-    def list_messages(self, soname: str, name: str): # получение данных
-        with self.__connection as connection:  # СОЗДАНИЕ ПОДКЛЮЧЕНИЯ
-            with self.__connection.cursor() as cursor:  # СОЗДАНИЕ ПАЧКИ ЗАПРОСОВ ДЛЯ ОТПРАВКИ В БД
-                cursor.execute("""SELECT dateof FROM birthday WHERE mysoname=%s AND myname=%s ORDER BY myname;""",(soname, name))
-                self.__connection.commit
-                print(str('Ты родился: '+str(cursor.fetchone())))
-                return cursor.fetchone()
-                cursor.close()
-                self.__connection.close()
-                print("[INFO] PostgreSQL connection closed")
-
-    def proverka_nalichia(self, soname: str, name: str):
-        with self.__connection as connection:  # СОЗДАНИЕ ПОДКЛЮЧЕНИЯ
-            with self.__connection.cursor() as cursor:  # СОЗДАНИЕ ПАЧКИ ЗАПРОСОВ ДЛЯ ОТПРАВКИ В БД
-                cursor.execute("""SELECT dateof FROM birthday WHERE mysoname=%s AND myname=%s ORDER BY myname;""",(soname, name))
-                return cursor.fetchone()
+    def job(self, message):
+        id = str(random.randrange(1, 10, 1))
+        self.list_messages(self, message, id)
+        print('проверка3')
 
 
-    def kolvo(self,birthday):
-        kol = 0
-        for bigb in birthday:
-            kol += 1
-        if kol < 5:
-            print('ОШИБКА!!!')
-            print('Введите дату своего рождения в формате: ДД-ММ')
-            birthday = input()
-            self.kolvo(birthday)
+class Alfa:
+    st = True
 
-    def cikl(self,birthday):
-        i = -1
-        for letter in birthday:
-            i += 1
-            if letter == '0' and i == 0 or letter == '1' and i == 0 or letter == '2' and i == 0 or letter == '3' and i == 0:
-                pass
-            elif letter == '0' and i == 1 or letter == '1' and i == 1 or letter == '2' and i == 1 or letter == '3' and i == 1 or letter == '4' and i == 1 or letter == '5' and i == 1 or letter == '6' and i == 1 or letter == '7' and i == 1 or letter == '8' and i == 1 or letter == '9' and i == 1:
-                pass
-            elif letter == '-' and i == 2:
-                pass
-            elif letter == '0' and i == 3 or letter == '1' and i == 3:
-                pass
-            elif letter == '0' and i == 4 or letter == '1' and i == 4 or letter == '2' and i == 4 or letter == '3' and i == 4 or letter == '4' and i == 4 or letter == '5' and i == 4 or letter == '6' and i == 4 or letter == '7' and i == 4 or letter == '8' and i == 4 or letter == '9' and i == 4:
-                pass
-            else:
-                print('ОШИБКА!!!')
-                print('Введите дату своего рождения повторно в формате: ДД-ММ')
-                birthday = input()
-                self.cikl(birthday)
+    def nstop(self,message):
+        self.st = True
+        bot.send_message(message.chat.id, str(self.st) + ' Я еще не начал')
 
-currency=Super()
-print('Введите свое имя:')
-name=input()
-print('Введите свою фамилию:')
-soname=input()
-currency.init_db()
-if currency.proverka_nalichia(soname, name)==None:
-    print('Введите дату своего рождения в формате: ДД-ММ')
-    birthday=input()
-    currency.kolvo(birthday)
-    currency.cikl(birthday)
-    currency.add_message(soname, name, birthday)
-else:
-    birthday=currency.list_messages(soname, name)
-currency.chech_currency()
+    def got(self,message):
+        stage = Beda
+        self.st = False
+        print('проверка ', self.st)
+        schedule.every().minutes.at(":01").do(stage.job, stage, message)
+        while self.st == False:
+            schedule.run_pending()
+            time.sleep(1)
+
+    def stop(self,message):
+        print('проверка2')
+        self.st = True
+        bot.send_message(message.chat.id, str(self.st) + ' OK')
+
+
+@ bot.message_handler(commands=['start'])
+def website(message):
+    knopka = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)#resize_keyboard - подстраивается под размер экрана, row_width - количество кнопок в ряду
+    start=types.KeyboardButton('ГОТОВ')
+    stap=types.KeyboardButton('СТОП')
+    knopka.add(start, stap)
+    bot.send_message(message.chat.id, 'Если готов, нажми кнопку внизу', reply_markup=knopka)
+
+@bot.message_handler()
+def gotova(message):
+    stage=Beda
+    levl=Alfa
+    stage.init_db(stage)
+
+    if message.text == 'СТОП' and levl.st == True:
+        levl.nstop(levl,message)
+
+    if message.text == 'ГОТОВ':
+        levl.got(levl,message)
+
+    if message.text == 'СТОП' and levl.st == False:
+        levl.stop(levl,message)
+
+bot.polling(none_stop=True)
