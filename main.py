@@ -11,7 +11,6 @@ bot=telebot.TeleBot('6147893827:AAGpotEVgnoK4Savpc_M1ns6UQcWyuWO4rI')
 class Beda:
     id = '1'
     __connection = None
-    #st=True
     message='Привет'
 
     def init_db(self):  # проверка существования нужной таблицы, в противном случае - создание
@@ -39,26 +38,33 @@ class Beda:
 
 class Alfa:
     st = True
+    a = True
 
     def nstop(self,message):
         self.st = True
-        bot.send_message(message.chat.id, str(self.st) + ' Я еще не начал')
+        bot.send_message(message.chat.id, 'Я еще не начал!')
 
     def got(self,message):
         stage = Beda
         self.st = False
-        print('проверка ', self.st)
-        schedule.every().minutes.at(":01").do(stage.job, stage, message)
-        while True:
-            schedule.run_pending()
-            time.sleep(1)
-            if self.st == True:
-                break
+        print('проверка ', self.st,self.a)
+        if self.a==True:
+            while True:
+                self.a = False
+                stage.job(stage,message)
+                time.sleep(5)
+                if self.st == True:
+                    print('проверка4')
+                    self.a=True
+                    break
+        else:
+            bot.send_message(message.chat.id, 'Уже нажал!')
+
 
     def stop(self,message):
         print('проверка2')
         self.st = True
-        bot.send_message(message.chat.id, str(self.st) + ' OK')
+        bot.send_message(message.chat.id, 'OK')
 
 
 @ bot.message_handler(commands=['start'])
