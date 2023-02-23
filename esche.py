@@ -21,9 +21,6 @@ class Super:
     birthday = '07-01'
     __connection = None
 
-    # def __init__(self):  # useless, but create int from temperature
-    #     self.current_converted_price = int(self.get_currency_price())
-
     def get_currency_price(self):  # get temperature from google
         full_page = requests.get(self.sayt, headers=self.headers)
         soup = BeautifulSoup(full_page.content, 'html.parser')
