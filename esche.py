@@ -4,116 +4,120 @@ import time
 import random
 import datetime
 import psycopg2
-from conf import host,user,password,db_name
+from conf import host, user, password, db_name
+
 
 class Super:
-    sayt='https://www.google.ru/search?q=%D0%BF%D0%BE%D0%B3%D0%BE%D0%B4%D0%B0+%D0%B2+%D0%BA%D1%80%D0%B0%D1%81%D0%BD%D0%BE%D0%B7%D0%BD%D0%B0%D0%BC%D0%B5%D0%BD%D1%81%D0%BA%D0%B5&newwindow=1&sxsrf=AJOqlzUYMY_AXixbjGjIsYJwKEyktMDX0Q%3A1676367414314&ei=NlbrY6fjEvKGwPAP5o-P2AE&ved=0ahUKEwin1vih25T9AhVyAxAIHebHAxsQ4dUDCBA&uact=5&oq=%D0%BF%D0%BE%D0%B3%D0%BE%D0%B4%D0%B0+%D0%B2+%D0%BA%D1%80%D0%B0%D1%81%D0%BD%D0%BE%D0%B7%D0%BD%D0%B0%D0%BC%D0%B5%D0%BD%D1%81%D0%BA%D0%B5&gs_lcp=Cgxnd3Mtd2l6LXNlcnAQAzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIMCAAQ6gIQtAIQQxgBMgwIABDqAhC0AhBDGAEyEgguEMcBENEDEOoCELQCEEMYATIMCAAQ6gIQtAIQQxgBMgwIABDqAhC0AhBDGAEyEgguEMcBENEDEOoCELQCEEMYATISCC4QxwEQ0QMQ6gIQtAIQQxgBMgwIABDqAhC0AhBDGAEyDAgAEOoCELQCEEMYATIMCAAQ6gIQtAIQQxgBSgQIQRgASgQIRhgBUABYqjxgv0BoAXABeACAAQCIAQCSAQCYAQCgAQGwARTAAQHaAQYIARABGAE&sclient=gws-wiz-serp'
-    headers = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.41'}
-    current_converted_price = 0
-    difference = 1
-    pozdr=0
-    denr=0
-    name='имя'
-    soname='фамилия'
-    birthday='07-01-1995'
+    sayt = 'https://www.google.ru/search?q=%D0%BF%D0%BE%D0%B3%D0%BE%D0%B4%D0%B0+%D0%B2+%D0%BA%D1%80%D0%B0%D1%81%D0%BD%D0%BE%D0%B7%D0%BD%D0%B0%D0%BC%D0%B5%D0%BD%D1%81%D0%BA%D0%B5&newwindow=1&sxsrf=AJOqlzUYMY_AXixbjGjIsYJwKEyktMDX0Q%3A1676367414314&ei=NlbrY6fjEvKGwPAP5o-P2AE&ved=0ahUKEwin1vih25T9AhVyAxAIHebHAxsQ4dUDCBA&uact=5&oq=%D0%BF%D0%BE%D0%B3%D0%BE%D0%B4%D0%B0+%D0%B2+%D0%BA%D1%80%D0%B0%D1%81%D0%BD%D0%BE%D0%B7%D0%BD%D0%B0%D0%BC%D0%B5%D0%BD%D1%81%D0%BA%D0%B5&gs_lcp=Cgxnd3Mtd2l6LXNlcnAQAzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIHCCMQ6gIQJzIMCAAQ6gIQtAIQQxgBMgwIABDqAhC0AhBDGAEyEgguEMcBENEDEOoCELQCEEMYATIMCAAQ6gIQtAIQQxgBMgwIABDqAhC0AhBDGAEyEgguEMcBENEDEOoCELQCEEMYATISCC4QxwEQ0QMQ6gIQtAIQQxgBMgwIABDqAhC0AhBDGAEyDAgAEOoCELQCEEMYATIMCAAQ6gIQtAIQQxgBSgQIQRgASgQIRhgBUABYqjxgv0BoAXABeACAAQCIAQCSAQCYAQCgAQGwARTAAQHaAQYIARABGAE&sclient=gws-wiz-serp'
+    # google
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.41'}
+    # what i'm not bot
+    current_converted_price = 0 # for temperature
+    difference = 1  # difference of temperature
+    pozdr = 0  # for one congratulation
+    denr = 0  # for one congratulation birthday
+    name = 'имя'
+    soname = 'фамилия'
+    birthday = '07-01'
     __connection = None
 
-    def __init__(self):
-        self.current_converted_price=int(self.get_currency_price())
+    # def __init__(self):  # useless, but create int from temperature
+    #     self.current_converted_price = int(self.get_currency_price())
 
-    def get_currency_price(self):
+    def get_currency_price(self):  # get temperature from google
         full_page = requests.get(self.sayt, headers=self.headers)
         soup = BeautifulSoup(full_page.content, 'html.parser')
-        convert = soup.findAll("span", {"class": "wob_t","class": "q8U8x"})
+        convert = soup.findAll("span", {"class": "wob_t", "class": "q8U8x"})  # from string in console from browser
         return convert[0].text
 
-    def chech_currency(self):
-        currency = int(self.get_currency_price())
-        if currency>=self.current_converted_price + self.difference:
-            m=random.randrange(0, 10, 1)
-            if m<3:
-                print ("Потеплело, снимай шапку!")
-            if m>=3 and m<6:
+    def chech_currency(self):  # for print random text in subject when temperature different from previous value
+        currency = int(self.get_currency_price())  # how __init__!
+        if currency >= self.current_converted_price + self.difference:
+            m = random.randrange(0, 3, 1)
+            if m == 0:
+                print("Потеплело, снимай шапку!")
+            if m == 1:
                 print("Потеплело, снимай куртку!")
-            if m>=6:
+            if m == 2:
                 print("Потеплело, снимай перчатки!")
             self.current_converted_price = currency
-        elif currency<=self.current_converted_price - self.difference:
+        elif currency <= self.current_converted_price - self.difference:
             m = random.randrange(0, 10, 1)
-            if m < 3:
+            if m == 0:
                 print("Похолодало, надевай шапку!")
-            if m >= 3 and m < 6:
+            if m == 1:
                 print("Похолодало, надевай куртку!")
-            if m >= 6:
+            if m == 2:
                 print("Похолодало, надевай перчатки!")
-            self.current_converted_price=currency
-        now = datetime.datetime.now()
-        print (now.strftime("%d-%m-%Y %H:%M"))
-        data=now.strftime("%d-%m")
-        if data=='15-02' and self.pozdr==0:
-            print('С праздником!!!')
-            self.pozdr=1
+            self.current_converted_price = currency  # update the last temperature value
+        now = datetime.datetime.now()  # create current time
+        print(now.strftime("%d-%m-%Y %H:%M"))
+        data = now.strftime("%d-%m")  # for input birthday
+        with self.__connection as connection:
+            with connection.cursor() as cursor:
+                # checking if today is a holiday
+                cursor.execute("""SELECT name FROM holidays WHERE  dat=%s;""", (data, ))
+                prazdnik = cursor.fetchone()
+        if prazdnik[0] == None:
+            pass
+        elif self.pozdr == 0:
+            print('С праздником: '+prazdnik[0]+'!!!')
+            self.pozdr = 1  # for don't repeat
 
-        if data==birthday and self.denr==1:
+        if data == birthday and self.denr == 1:  # checking if today is a birthday of user
             print('С днем рождения, '+name+' '+soname+'!!!')
-            self.denr=1
+            self.denr = 1  # for don't repeat
         print('Температура воздуха в Краснознаменске сейчас '+str(currency)+' оС')
         time.sleep(300)
-        self.chech_currency()
+        self.chech_currency()  # repeat
 
-    def init_db(self):  # проверка существования нужной таблицы, в противном случае - создание
-        #connection.autocommit = True
+    def init_db(self):  # checking the existence of the desired table, otherwise - creating
+        # connection.autocommit = True
         if self.__connection is None:
             self.__connection = psycopg2.connect(host=host, user=user, password=password, database=db_name)
-        with self.__connection as connection:  # СОЗДАНИЕ ПОДКЛЮЧЕНИЯ
-            with self.__connection.cursor() as cursor:  # СОЗДАНИЕ ПАЧКИ ЗАПРОСОВ ДЛЯ ОТПРАВКИ В БД
-                    # cursor.execute('DROP TABLE IF EXISTS birthday')  # УДАЛИТЬ ЕЕ, ЕСЛИ ПЕРЕДАН ФЛАЖОК ФОРС
-                    # print("[INFO] Table was deleted")
+        with self.__connection as connection:
+            with connection.cursor() as cursor:
 
                 cursor.execute("""CREATE TABLE IF NOT EXISTS birthday(
                             id          serial PRIMARY KEY,
                             myname      varchar NOT NULL,
                             mysoname    varchar NOT NULL,
                             dateof      varchar NOT NULL);""")
-                self.__connection.commit
-                #print("[INFO] Table created successfully")
+                connection.commit  # not needed?
 
-    def add_message(self, soname: str, name: str, birthday: str):#добавление данных
-        with self.__connection as connection:  # СОЗДАНИЕ ПОДКЛЮЧЕНИЯ
-            with self.__connection.cursor() as cursor:  # СОЗДАНИЕ ПАЧКИ ЗАПРОСОВ ДЛЯ ОТПРАВКИ В БД
-                cursor.execute("""INSERT INTO birthday (myname,mysoname,dateof) VALUES (%s,%s,%s);""",(name,soname, birthday))
-                self.__connection.commit
+    def add_message(self, soname: str, name: str, birthday: str):  # add data about user
+        with self.__connection as connection:
+            with connection.cursor() as cursor:
+                cursor.execute("""INSERT INTO birthday (myname, mysoname, dateof) VALUES (%s,%s,%s);""",
+                               (name, soname, birthday))
+                connection.commit  # not needed?
                 print("[INFO] Data was successfully inserted")
 
-    def list_messages(self, soname: str, name: str): # получение данных
-        with self.__connection as connection:  # СОЗДАНИЕ ПОДКЛЮЧЕНИЯ
-            with self.__connection.cursor() as cursor:  # СОЗДАНИЕ ПАЧКИ ЗАПРОСОВ ДЛЯ ОТПРАВКИ В БД
-                cursor.execute("""SELECT dateof FROM birthday WHERE mysoname=%s AND myname=%s ORDER BY myname;""",(soname, name))
-                self.__connection.commit
-                print(str('Ты родился: '+str(cursor.fetchone())))
+    def list_messages(self, soname: str, name: str):  # get data about birthday of user
+        with self.__connection as connection:
+            with connection.cursor() as cursor:
+                cursor.execute("""SELECT dateof FROM birthday WHERE mysoname=%s AND myname=%s ORDER BY myname;""", (soname, name))
+                data_birth = cursor.fetchone()
+                print('Ты родился: ', data_birth[0])  # to show the user that he is already registered
                 return cursor.fetchone()
-                cursor.close()
-                self.__connection.close()
+                cursor.close()  # not needed?
+                self.__connection.close()  # and this needed?
                 print("[INFO] PostgreSQL connection closed")
 
-    def proverka_nalichia(self, soname: str, name: str):
-        with self.__connection as connection:  # СОЗДАНИЕ ПОДКЛЮЧЕНИЯ
-            with self.__connection.cursor() as cursor:  # СОЗДАНИЕ ПАЧКИ ЗАПРОСОВ ДЛЯ ОТПРАВКИ В БД
-                cursor.execute("""SELECT dateof FROM birthday WHERE mysoname=%s AND myname=%s ORDER BY myname;""",(soname, name))
+    def proverka_nalichia(self, soname: str, name: str):  # check data of user in db
+        with self.__connection as connection:
+            with connection.cursor() as cursor:
+                cursor.execute("""SELECT dateof FROM birthday WHERE mysoname=%s AND myname=%s ORDER BY myname;""", (soname, name))
                 return cursor.fetchone()
 
-
-    def kolvo(self,birthday):
-        kol = 0
-        for bigb in birthday:
-            kol += 1
-        if kol < 5:
+    def kolvo(self, birthday):  # character count check for birthday
+        if len(birthday) < 5 or len(birthday) > 5:
             print('ОШИБКА!!!')
             print('Введите дату своего рождения в формате: ДД-ММ')
             birthday = input()
             self.kolvo(birthday)
 
-    def cikl(self,birthday):
+    def cikl(self, birthday):  # format conformance check for birthday
         i = -1
         for letter in birthday:
             i += 1
@@ -133,18 +137,19 @@ class Super:
                 birthday = input()
                 self.cikl(birthday)
 
-currency=Super()
+
+currency = Super()
 print('Введите свое имя:')
-name=input()
+name = input()
 print('Введите свою фамилию:')
-soname=input()
+soname = input()
 currency.init_db()
-if currency.proverka_nalichia(soname, name)==None:
+if currency.proverka_nalichia(soname, name) == None:  # for new user
     print('Введите дату своего рождения в формате: ДД-ММ')
-    birthday=input()
+    birthday = input()
     currency.kolvo(birthday)
     currency.cikl(birthday)
     currency.add_message(soname, name, birthday)
 else:
-    birthday=currency.list_messages(soname, name)
+    birthday = currency.list_messages(soname, name)
 currency.chech_currency()
